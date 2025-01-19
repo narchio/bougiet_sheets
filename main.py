@@ -11,7 +11,7 @@ COLUMNS = [
     'category',
 ]
 
-def clean_rows(df: pd.DataFrame): 
+def get_cleaned_df(df: pd.DataFrame): 
      # Step 2b: Clean the data and populate the new dataframe.
     cleaned_rows = []
     for index, row in df.iterrows(): 
@@ -22,56 +22,41 @@ def clean_rows(df: pd.DataFrame):
 
 def process(df: pd.DataFrame, existing_sheet_df: pd.DataFrame): 
     # Step 2: Clean data 
-
-    # Step 2a: figure out what class to call (use the headers to figure it out 
+    # TODO(ncarchio): Step 2a: figure out what class to call (use the headers to figure it out 
     # -- each bank/credit card has its own headers)
-
+    #           Note: can prob make all of these accounts an abstract class. Will make this code much simpler.
 
     # Step 2b: Clean the data and populate the new dataframe.
-    new_df = clean_rows(df)
-
+    new_df = get_cleaned_df(df)
     print(f"cleaned new df: {new_df}\n\n")
 
 
-    # Step 3: 
-    # dedupe new df with old df
-    # test code to ensure dedupinng works 
-    # old_df = new_df.copy()
-    # old_length = len(old_df)
-    # old_df['id'] = new_df['id'].apply(lambda x: x+"_next")
-    # dup_row = old_df.iloc[0]
-    # print(f"dup row: {dup_row}")
-    # old_df.loc[len(old_df)] = dup_row
-    # print(old_df)
-
-
-    # keep track of the original length of the old df
-    existing_len = len(existing_sheet_df)
-    print(f"existing_len: {existing_len}")
-    # append the new df onto the existing df
+    # Keep track of the original length of existing entries from the db.
+    db_entries_length = len(existing_sheet_df)
+    # Combine the dataframes. 
+    # Note: Currenty not using concat since we don't want the extra fully memory copy. However, we can optimize this in the future.
     for index, row in new_df.iterrows(): 
-        current_index = existing_len + index
+        current_index = db_entries_length + index
         existing_sheet_df.loc[current_index] = row
-
-    print(f"{existing_sheet_df}, len: {len(existing_sheet_df)}")
-    # dedupe them 
+    print(f"Combined dfs{existing_sheet_df}, len: {len(existing_sheet_df)}")
+    
+    # Dedupe the dataframes to remove any entries that already exist.
     df_deduped = existing_sheet_df.drop_duplicates(subset='id', keep='first') 
     print(f"deduped: {df_deduped}, len: {len(df_deduped)}")
 
 
-    # then, from the old index to the end of the length of the new df, those will be 'new' entries
-    number_of_deduped_entries = (len(new_df) + existing_len) - len(df_deduped)
+    # Now, get all new entries after deduping. 
+    number_of_deduped_entries = (len(new_df) + db_entries_length) - len(df_deduped)
     number_of_new_entries = len(new_df) - number_of_deduped_entries
-    print(f"new entries: [{number_of_new_entries}]")
-
     start_index = len(df_deduped) - number_of_new_entries
-    print(f"start index: {start_index}")
     new_entries = []
     for index, row in df_deduped.iloc[start_index:].iterrows(): 
         new_entries.append(row)
-
     new_entries_df = pd.DataFrame(new_entries, columns=COLUMNS)
     print(f"new_entries_df {new_entries_df}")
+
+    # Write the new entreis to google sheets. 
+    # TODO(ncarchio): implement this
 
         
 
@@ -102,7 +87,7 @@ def main():
         print(f"processing {file_path}")
         
         if (i == 0): 
-            existing_sheet_df =  clean_rows(pd.read_csv(file_path))
+            existing_sheet_df =  get_cleaned_df(pd.read_csv(file_path))
             i += 1
             continue
 
