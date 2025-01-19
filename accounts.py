@@ -88,7 +88,7 @@ def create_id(date: datetime, description: str, amount: float):
     return f'{get_date_string(date)}_{description}_{amount}'
 
 
-class AmericanExpressLine(BaseModel): 
+class AmericanExpressRow(BaseModel): 
     id: str
     date: datetime
     description: str
@@ -96,9 +96,9 @@ class AmericanExpressLine(BaseModel):
     category: str
 
     @classmethod
-    def clean_data(cls, row: list) -> "AmericanExpressLine | None":
+    def clean_data(cls, row: list) -> "AmericanExpressRow | None":
         """"
-        Builds the AmericanExpressLine, cleaning any necessary data as needed. 
+        Builds the AmericanExpressRow, cleaning any necessary data as needed. 
         
         American Express CSV example: 
             Date,       Description,    Card Member,    Account #,  Amount
@@ -128,3 +128,16 @@ class AmericanExpressLine(BaseModel):
             amount = amount, 
             category = category
         ) 
+    
+    def convert_to_list(self): 
+        """
+        Returns the AmericanExpressRow as a list that can later be used to populate a pd.Dataframe. 
+        """
+        return [
+            self.id, 
+            self.date, 
+            self.description, 
+            self.amount, 
+            self.category
+        ]
+        
