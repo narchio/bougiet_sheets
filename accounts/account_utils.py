@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from pydantic import BaseModel
-
 def get_date_string(date_object: datetime): 
     return date_object.strftime("%m/%d/%Y")
 
@@ -86,58 +84,3 @@ def get_amount(amount: str):
 
 def create_id(date: datetime, description: str, amount: float): 
     return f'{get_date_string(date)}_{description}_{amount}'
-
-
-class AmericanExpressRow(BaseModel): 
-    id: str
-    date: datetime
-    description: str
-    amount: float
-    category: str
-
-    @classmethod
-    def clean_data(cls, row: list) -> "AmericanExpressRow | None":
-        """"
-        Builds the AmericanExpressRow, cleaning any necessary data as needed. 
-        
-        American Express CSV example: 
-            Date,       Description,    Card Member,    Account #,  Amount
-            12/20/2024, Amazon,         JOHN SMITH,            1,     -21.10 --> Refund
-            12/20/2024, Amazon,         JOHN SMITH,            1,     45.83 --> Charge
-
-        """
-        # Date
-        date = standardize_date(date_string=row[0])
-
-        # Description 
-        description = clean_description(description=row[1])
-
-        # Amount
-        amount = get_amount(amount=row[4])
-
-        # Category
-        category = ''
-
-        # Get the transaction id after all the data has been cleaned. 
-        id = create_id(date, description, amount)
-        
-        return cls(
-            id = id,
-            date = date, 
-            description = description, 
-            amount = amount, 
-            category = category
-        ) 
-    
-    def convert_to_list(self): 
-        """
-        Returns the AmericanExpressRow as a list that can later be used to populate a pd.Dataframe. 
-        """
-        return [
-            self.id, 
-            self.date, 
-            self.description, 
-            self.amount, 
-            self.category
-        ]
-        
