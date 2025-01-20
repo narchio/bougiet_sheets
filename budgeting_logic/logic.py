@@ -1,7 +1,7 @@
 import pandas as pd
 from colorama import Fore, Style
 from accounts.american_express import AmericanExpressRow
-from constants import CATEGORIES, COLUMNS
+from budgeting_logic.constants import CATEGORIES, COLUMNS
 
 # -------------------
 # Data cleaning functions 

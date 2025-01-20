@@ -1,8 +1,8 @@
 import gspread
+import pandas as pd
 
-from pandas import pd
 from google.oauth2.service_account import Credentials
-from constants import COLUMNS
+from budgeting_logic.constants import COLUMNS
 from settings import SETTINGS
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
