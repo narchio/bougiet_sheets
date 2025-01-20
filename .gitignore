@@ -170,5 +170,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# hide api credentials file
-sheets_api_credentials.json
+# Hide api credentials and google sheets info
+settings.py
